@@ -62,7 +62,7 @@ args = parse_args()
 
 
 class CustomDataset(object):
-    def __init__(self, root, transforms, ignore_area=300):
+    def __init__(self, root, transforms, ignore_area=250):
         self.root = root
         self.transforms = transforms
         # load all image files, sorting them to
@@ -112,9 +112,9 @@ class CustomDataset(object):
             ]
             cur_area = (cur_box[2] - cur_box[0]) * (cur_box[3] - cur_box[1])
             if cur_area < self.ignore_area:
-                print('ignore small bbox < '
-                      '{} {}'.format(self.ignore_area,
-                                     os.path.basename(img_path)))
+                # print('ignore small bbox < '
+                #       '{} {}'.format(self.ignore_area,
+                #                      os.path.basename(img_path)))
                 continue
             boxes.append(
                 cur_box
@@ -184,7 +184,7 @@ def main():
     # define training and validation data loaders
     batch_size = args.batch_size
     data_loader = torch.utils.data.DataLoader(
-        dataset, batch_size=batch_size, shuffle=False, num_workers=4,
+        dataset, batch_size=batch_size, shuffle=True, num_workers=4,
         collate_fn=utils.collate_fn)
     if dataset_test is not None:
         data_loader_test = torch.utils.data.DataLoader(
@@ -214,7 +214,7 @@ def main():
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
         train_one_epoch(model, optimizer, data_loader, device, epoch,
-                        print_freq=10)
+                        print_freq=200)
         # update the learning rate
         lr_scheduler.step()
         # evaluate on the test dataset

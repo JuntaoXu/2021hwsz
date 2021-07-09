@@ -57,11 +57,12 @@ def draw(img, bboxes):
 
 
 if __name__ == '__main__':
-    angle = 30
-    bboxes = [[1201, 621, 1233, 691], [1099, 455, 1122, 540], [1084, 789, 1071, 762]]
-    img = cv2.imread("D:/2021hwsz/Images/2020-01-11_21_36_02_642.jpg")
-    draw(img, bboxes)
+    while True:
+        angle = 30
+        bboxes = [[1201, 621, 1233, 691], [1099, 455, 1122, 540], [1084, 789, 1071, 762]]
+        img = cv2.imread("D:/2021hwsz/Images/2020-01-11_21_36_02_642.jpg")
+        draw(img, bboxes)
 
-    img = cv2.imread("D:/2021hwsz/Images/2020-01-11_21_36_02_642.jpg")
-    rotated_img, rotated_bboxes = rotate(img, bboxes, angle)
-    draw(rotated_img, rotated_bboxes)
+        img = cv2.imread("D:/2021hwsz/Images/2020-01-11_21_36_02_642.jpg")
+        rotated_img, rotated_bboxes = rotate(img, bboxes, angle)
+        draw(rotated_img, rotated_bboxes)
