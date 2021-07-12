@@ -11,9 +11,10 @@ os.system('cd /home/work/user-job-dir/code && '
           'cp ./pretrained/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth '
           '/home/work/.cache/torch/hub/checkpoints/'
           'fasterrcnn_resnet50_fpn_coco-258fb6c6.pth')
+
 import numpy as np
 from PIL import Image
-import moxing as mox
+import moxing as mox     # used for moving data in huawei cloud service
 import torch
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
@@ -22,9 +23,7 @@ from utils.engine import train_one_epoch, evaluate
 from utils import transforms as T
 from utils import utils
 
-"""
-消除随机因素的影响
-"""
+# avoid random effect on output
 torch.manual_seed(2021)
 
 
