@@ -11,10 +11,9 @@ os.system('cd /home/work/user-job-dir/code && '
           'cp ./pretrained/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth '
           '/home/work/.cache/torch/hub/checkpoints/'
           'fasterrcnn_resnet50_fpn_coco-258fb6c6.pth')
-
 import numpy as np
 from PIL import Image
-import moxing as mox     # used for moving data in huawei cloud service
+import moxing as mox
 import torch
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
@@ -23,8 +22,10 @@ from utils.engine import train_one_epoch, evaluate
 from utils import transforms as T
 from utils import utils
 
-# avoid random effect on output
-torch.manual_seed(2021)
+"""
+消除随机因素的影响
+"""
+torch.manual_seed(31)
 
 
 def parse_args():
@@ -61,7 +62,7 @@ args = parse_args()
 
 
 class CustomDataset(object):
-    def __init__(self, root, transforms, ignore_area=250):
+    def __init__(self, root, transforms, ignore_area=200):
         self.root = root
         self.transforms = transforms
         # load all image files, sorting them to
@@ -111,9 +112,9 @@ class CustomDataset(object):
             ]
             cur_area = (cur_box[2] - cur_box[0]) * (cur_box[3] - cur_box[1])
             if cur_area < self.ignore_area:
-                # print('ignore small bbox < '
-                #       '{} {}'.format(self.ignore_area,
-                #                      os.path.basename(img_path)))
+                #print('ignore small bbox < '
+                #      '{} {}'.format(self.ignore_area,
+                #                     os.path.basename(img_path)))
                 continue
             boxes.append(
                 cur_box
@@ -146,6 +147,8 @@ class CustomDataset(object):
 def get_transform():
     transforms = []
     transforms.append(T.ToTensor())
+    # transforms.append(T.RandomAutocontrast())
+    # applier = T.RandomApply(transforms=transforms, p=0.5)
     return T.Compose(transforms)
 
 
@@ -200,18 +203,22 @@ def main():
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=0.01,
-                                momentum=0.9, weight_decay=0.0005)
+    optimizer = torch.optim.SGD(params, lr=0.001,
+                                momentum=0.95, weight_decay=0.0005)
+    learning_rate = 0.001
+    # optimizer = torch.optim.RMSprop(params, lr=learning_rate, alpha=0.99, eps=1e-08, weight_decay=0.0005, momentum=0.95, centered=False)
     # and a learning rate scheduler
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-                                                   step_size=3,
-                                                   gamma=0.1)
+    # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
+    #                                                step_size=2,
+    #                                                gamma=0.2)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 5, eta_min=0.00001, last_epoch=-1)
+
 
     # let's train it for 10 epochs
     num_epochs = args.num_epochs
     local_ckpt_path = None
     for epoch in range(num_epochs):
-        # train for one epoch, printing every 10 iterations
+        # train for one epoch, printing every 200 iterations
         train_one_epoch(model, optimizer, data_loader, device, epoch,
                         print_freq=200)
         # update the learning rate
@@ -256,8 +263,8 @@ def prepare_data(data_url, training_dir):
     mox.file.copy_parallel('{}'.format(data_url),
                            training_dir)
     os.system('ls {}'.format(training_dir))
-    os.system('cd {} && unzip -qq 2021hwsz-data-Images.zip '
-              '&& unzip -qq 2021hwsz-data-Annotations.zip'.format(
+    os.system('cd {} && unzip -qq Images.zip '
+              '&& unzip -qq Annotations.zip'.format(
                 training_dir))
 
 
