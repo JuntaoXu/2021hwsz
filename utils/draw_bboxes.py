@@ -3,8 +3,8 @@ import cv2
 import json
 from tqdm import tqdm
 
-pic_origin_dir = "D:/2021hwsz/Images/"
-annotation_dir = "D:/2021hwsz/Annotations/"
+pic_origin_dir = "D:/2021hwsz/data/base_unzipImages/"
+annotation_dir = "D:/2021hwsz/data/base_unzipAnnotations/"
 saving_dir = "D:/2021hwsz/Images_with_bboxes/"
 
 defect_types = ['right_angle_edge_defect', 'connection_edge_defect', 'burr_defect', 'cavity_defect', 'huahen', 'mosun', 'yanse', 'jianju', 'basi', 'chuizhidu']

@@ -1,16 +1,16 @@
 import os
 import json
 import argparse
-"""
-1、安装相关依赖
-2、将pretrained-model移动至指定位置
-"""
+
+# install requirement
+# cp pretrained model to working directory
 os.system('cd /home/work/user-job-dir/code && pip install -r requirements.txt')
 os.system('cd /home/work/user-job-dir/code && '
           'mkdir -p /home/work/.cache/torch/hub/checkpoints/ &&'
           'cp ./pretrained/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth '
           '/home/work/.cache/torch/hub/checkpoints/'
           'fasterrcnn_resnet50_fpn_coco-258fb6c6.pth')
+
 import numpy as np
 from PIL import Image
 import moxing as mox
@@ -22,9 +22,7 @@ from utils.engine import train_one_epoch, evaluate
 from utils import transforms as T
 from utils import utils
 
-"""
-消除随机因素的影响
-"""
+# avoid random effect on result
 torch.manual_seed(31)
 
 
@@ -154,8 +152,7 @@ def get_transform():
 
 def get_object_detector(num_classes):
     # load an instance segmentation model pre-trained pre-trained on COCO
-    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-        pretrained=True)
+    model = torch.load('/home/work/.cache/torch/hub/checkpoints/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth')
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     # replace the pre-trained head with a new one

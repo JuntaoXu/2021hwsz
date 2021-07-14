@@ -1,0 +1,5 @@
+['right_angle_edge_defect', 'connection_edge_defect', 'burr_defect', 'cavity_defect', 'huahen', 'mosun', 'yanse', 'jianju', 'basi', 'chuizhidu']
+[5826, 6852, 1830, 1857, 4364, 3960, 1790, 2905, 3202, 1054]
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+number of false annotations  1
+number of defect_bbox_area  358
