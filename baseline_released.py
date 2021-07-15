@@ -60,7 +60,7 @@ args = parse_args()
 
 
 class CustomDataset(object):
-    def __init__(self, root, transforms, ignore_area=200):
+    def __init__(self, root, transforms, ignore_area=10):
         self.root = root
         self.transforms = transforms
         # load all image files, sorting them to
@@ -152,7 +152,8 @@ def get_transform():
 
 def get_object_detector(num_classes):
     # load an instance segmentation model pre-trained pre-trained on COCO
-    model = torch.load('/home/work/.cache/torch/hub/checkpoints/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth')
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        pretrained=True)
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     # replace the pre-trained head with a new one
