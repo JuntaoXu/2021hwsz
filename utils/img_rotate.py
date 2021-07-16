@@ -102,7 +102,7 @@ def read_img_annotation(pic_dir, annotation_dir):
 
 
 if __name__ == '__main__':
-    angle = 30
+    angle = 10
     img_origin_dir = "D:/2021hwsz/data/test/augmentation_test/Images/"
     annotation_origin_dir = "D:/2021hwsz/data/test/augmentation_test/Annotations/"
     img_save_dir = "D:/2021hwsz/data/test/augmentation_test/Rotated_Images/"
@@ -122,4 +122,4 @@ if __name__ == '__main__':
         # cv2.imshow('result', img)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
-        # cv2.imwrite(img_save_dir + file, img)
+        cv2.imwrite(img_save_dir + file, img)
