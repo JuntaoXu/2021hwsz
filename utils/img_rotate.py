@@ -70,6 +70,11 @@ def bound_rotated_bbox(rotated_point_groups):
 
     return rotated_bboxes
 
+def rotated(img, bboxes, angle):
+    rotated_img, rotated_point_groups = rotate(img, bboxes, angle)
+    rotated_bboxes = bound_rotated_bbox(rotated_point_groups)
+    return rotated_img, rotated_bboxes
+
 
 def draw_points(img, point_groups):
     for group in point_groups:
