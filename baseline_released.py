@@ -10,14 +10,11 @@ os.system('cd /home/work/user-job-dir/code && '
           'cp ./pretrained/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth '
           '/home/work/.cache/torch/hub/checkpoints/'
           'fasterrcnn_resnet50_fpn_coco-258fb6c6.pth')
-<<<<<<< Updated upstream
-=======
 os.system('cd /home/work/user-job-dir/code && '
           'mkdir -p /home/work/.cache/torch/hub/checkpoints/ &&'
           'cp ./pretrained/model_last.pth '
           '/home/work/.cache/torch/hub/checkpoints/'
           'model_last.pth')
->>>>>>> Stashed changes
 
 import numpy as np
 from PIL import Image
@@ -30,15 +27,12 @@ from utils.engine import train_one_epoch, evaluate
 from utils import transforms as T
 from utils import utils
 
-<<<<<<< Updated upstream
 # avoid random effect on result
 torch.manual_seed(31)
-=======
 """
 消除随机因素的影响
 """
 torch.manual_seed(42)
->>>>>>> Stashed changes
 
 
 def parse_args():
@@ -75,19 +69,14 @@ args = parse_args()
 
 
 class CustomDataset(object):
-<<<<<<< Updated upstream
-    def __init__(self, root, transforms, ignore_area=10):
-=======
     def __init__(self, root, transforms, ignore_area=250):
->>>>>>> Stashed changes
         self.root = root
         self.transforms = transforms
         # load all image files, sorting them to
         # ensure that they are aligned
         self.ignore_area = ignore_area
         self.imgs = list(sorted(os.listdir(os.path.join(root, "Images"))))
-        self.annotations = list(sorted(os.listdir(os.path.join(root,
-                                                               "Annotations"))))
+        self.annotations = list(sorted(os.listdir(os.path.join(root, "Annotations"))))
         self.label_mapping = {
             "connection_edge_defect": 1,
             "right_angle_edge_defect": 2,
@@ -129,7 +118,7 @@ class CustomDataset(object):
             ]
             cur_area = (cur_box[2] - cur_box[0]) * (cur_box[3] - cur_box[1])
             if cur_area < self.ignore_area:
-                #print('ignore small bbox < '
+                # print('ignore small bbox < '
                 #      '{} {}'.format(self.ignore_area,
                 #                     os.path.basename(img_path)))
                 continue
@@ -162,8 +151,7 @@ class CustomDataset(object):
 
 
 def get_transform():
-    transforms = []
-    transforms.append(T.ToTensor())
+    transforms = [T.ToTensor()]
     # transforms.append(T.RandomAutocontrast())
     # applier = T.RandomApply(transforms=transforms, p=0.5)
     return T.Compose(transforms)
@@ -179,10 +167,12 @@ def get_object_detector(num_classes):
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     return model
 
+
 def get_trained_obejct_detector(num_classes):
     model = torch.load('/home/work/.cache/torch/hub/checkpoints/model_last.pth')
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+    return model
 
 
 def main():
@@ -193,8 +183,7 @@ def main():
     # our dataset has two classes only - background and person
     num_classes = 1 + args.num_classes
     # use our dataset and defined transformations
-    dataset = CustomDataset(args.train_dir,
-                            get_transform())
+    dataset = CustomDataset(args.train_dir, get_transform())
     if args.validate_dir is not None:
         dataset_test = CustomDataset(args.validate_dir,
                                      get_transform())
@@ -217,9 +206,9 @@ def main():
     else:
         data_loader_test = None
 
-    Resume = True
-    if Resume:
-        get_trained_obejct_detector(num_classes)
+    resume = True
+    if resume:
+        model = get_trained_obejct_detector(num_classes)
     else:
         # get the model using our helper function
         model = get_object_detector(num_classes)
@@ -229,21 +218,18 @@ def main():
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-<<<<<<< Updated upstream
     optimizer = torch.optim.SGD(params, lr=0.001,
                                 momentum=0.95, weight_decay=0.0005)
     learning_rate = 0.001
-    # optimizer = torch.optim.RMSprop(params, lr=learning_rate, alpha=0.99, eps=1e-08, weight_decay=0.0005, momentum=0.95, centered=False)
-=======
+    # optimizer = torch.optim.RMSprop(params, lr=learning_rate,
+    #                                 alpha=0.99, eps=1e-08, weight_decay=0.0005, momentum=0.95, centered=False)
     optimizer = torch.optim.SGD(params, lr=0.01,
                                 momentum=0.95, weight_decay=0.0005)
->>>>>>> Stashed changes
     # and a learning rate scheduler
     # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
     #                                                step_size=2,
     #                                                gamma=0.2)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 5, eta_min=0.00001, last_epoch=-1)
-
 
     # let's train it for 10 epochs
     num_epochs = args.num_epochs
@@ -291,19 +277,14 @@ def main():
 
 def prepare_data(data_url, training_dir):
     print(data_url)
-    mox.file.copy_parallel('{}'.format(data_url),
-                           training_dir)
+    mox.file.copy_parallel('{}'.format(data_url), training_dir)
     os.system('ls {}'.format(training_dir))
     os.system('cd {} && unzip -qq Images.zip '
-              '&& unzip -qq Annotations.zip'.format(
-                training_dir))
+              '&& unzip -qq Annotations.zip'.format(training_dir))
 
 
 if __name__ == '__main__':
-    prepare_data(
-        args.data_url,
-        args.train_dir
-    )
+    prepare_data(args.data_url, args.train_dir)
     print(args.data_url)
     print(args.train_url)
     print(args.last_path)

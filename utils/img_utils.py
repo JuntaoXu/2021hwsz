@@ -3,15 +3,12 @@ import cv2
 import json
 from tqdm import tqdm
 
-<<<<<<< Updated upstream:utils/img_utils.py
 pic_origin_dir = "D:/2021hwsz/data/base_unzip/Images/"
 annotation_origin_dir = "D:/2021hwsz/data/base_unzip/Annotations/"
 saving_dir = "D:/2021hwsz/Images_with_bboxes/"
-=======
 pic_origin_dir = "/Users/juntaoxu/Desktop/2021hwsz/aug0708_unzip/Images/Images/"
 annotation_dir = "/Users/juntaoxu/Desktop/2021hwsz/aug0708_unzip/Annotations/Annotations/"
 saving_dir = ""
->>>>>>> Stashed changes:utils/draw_bboxes.py
 
 defect_bbox_area = 10
 
@@ -59,13 +56,11 @@ def traverse_img_annotation(pic_origin_dir, annotation_dir, saving_dir,
                     xmax = int(max(bbox_coordinate[0][0], bbox_coordinate[1][0]))
                     ymax = int(max(bbox_coordinate[0][1], bbox_coordinate[1][1]))
 
-<<<<<<< Updated upstream:utils/img_utils.py
                     if (xmax - xmin) * (ymax - ymin) < defect_bbox_area:
                         defect_bbox_area += 1
                         cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
                         cv2.putText(img, defect_type, (xmin - 350, ymin - 30), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0))
                         # show_img(img)
-=======
                     if (xmax - xmin) * (ymax - ymin) < 150:
                         defect_bbox_area += 1
                         cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
@@ -74,7 +69,6 @@ def traverse_img_annotation(pic_origin_dir, annotation_dir, saving_dir,
                         cv2.imshow("img", img)
                         cv2.waitKey(0)
                         cv2.destroyAllWindows()
->>>>>>> Stashed changes:utils/draw_bboxes.py
 
                     else:
                         continue
@@ -85,14 +79,11 @@ def traverse_img_annotation(pic_origin_dir, annotation_dir, saving_dir,
                     # print(filename)
                     defect_annotation += 1
 
-<<<<<<< Updated upstream:utils/img_utils.py
         # save_img(saving_dir, img, file)
-=======
         # cv2.imwrite(saving_dir + file, img)
         cv2.imshow("img", img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
->>>>>>> Stashed changes:utils/draw_bboxes.py
 
     print(defect_types)
     print("number of false annotations: ", defect_annotation)
