@@ -6,9 +6,11 @@ import tqdm
 import numpy as np
 from data_augmentation import *
 import datetime
+from utils.img_rotate import rotated
 
 HARD_CLASS = ['cavity_defect', 'chuizhidu']
 COMMON_CLASS = ['huahen', 'mosun', 'jianju', 'basi']
+LESS_ROTATION = ['right_angle_edge_defect', 'connection_edge_defect', 'burr_defect', 'cavity_defect']
 
 
 def myconverter(obj):
@@ -60,7 +62,7 @@ def read_imgs(imgpath, savepath):
                 else:
                     common[label] = [bbox]
 
-                loop = 4
+                loop = 5
             else:
                 loop = 2
             loop_count.append(loop)
@@ -81,7 +83,7 @@ def read_imgs(imgpath, savepath):
                 newbbox = [[newbbox[0], newbbox[1]], [newbbox[2], newbbox[3]]]
                 s['points'] = newbbox
             data['shapes'] = shapes
-            print('shapes: ', data['shapes'])
+            # print('shapes: ', data['shapes'])
 
             # Writing to sample.json
             with open(os.path.join(savepath,'Annotations',imgname + '.json'), 'w') as outfile:
@@ -94,11 +96,13 @@ def read_imgs(imgpath, savepath):
             # print(hard)
             shapes = ori_shapes
             bboxes = list()
+            rot_deg = 10
             for h in hard:
                 # print(hard[h])
+                if h in LESS_ROTATION: rot_deg = 5
                 bboxes.extend(hard[h])
             for i in range(8-base_loop):
-                newI, newbboxes = aug(I, bboxes)
+                newI, newbboxes = aug(I, bboxes, rot_deg)
                 imgname = os.path.split(img)[-1].split('.')[0] + '_' + 'hard' + '_' + str(i)
                 cv2.imwrite(os.path.join(savepath,'Images',imgname + '.jpg'), newI)
                 shapes = [i for i in shapes if i['label'] in hard.keys()]
@@ -109,7 +113,7 @@ def read_imgs(imgpath, savepath):
                     newbbox = [[newbbox[0], newbbox[1]], [newbbox[2], newbbox[3]]]
                     s['points'] = newbbox
                 data['shapes'] = shapes
-                print('shapes: ', data['shapes'])
+                # print('shapes: ', data['shapes'])
                 with open(os.path.join(savepath, 'Annotations', imgname + '.json'), "w") as outfile:
                     json.dump(data, outfile, indent=4, default=myconverter)
 
@@ -117,6 +121,7 @@ def read_imgs(imgpath, savepath):
             # print(common)
             shapes = ori_shapes
             bboxes = list()
+            rot_deg = 15
             for h in common:
                 if common[h] is None:
                     # print(h, img)
@@ -124,7 +129,7 @@ def read_imgs(imgpath, savepath):
                 bboxes.extend(common[h])
             for i in range(8-base_loop):
                 # print(bboxes)
-                newI, newbboxes = aug(I, bboxes)
+                newI, newbboxes = aug(I, bboxes, rot_deg)
                 imgname = os.path.split(img)[-1].split('.')[0] + '_' + 'common' + '_' + str(i)
                 cv2.imwrite(os.path.join(savepath,'Images',imgname + '.jpg'), newI)
                 shapes = [i for i in shapes if i['label'] in common.keys()]
@@ -133,14 +138,14 @@ def read_imgs(imgpath, savepath):
                     newbbox = [[newbbox[0], newbbox[1]], [newbbox[2], newbbox[3]]]
                     s['points'] = newbbox
                 data['shapes'] = shapes
-                print('shapes: ', data['shapes'])
+                # print('shapes: ', data['shapes'])
 
                 # Writing to sample.json
                 with open(os.path.join(savepath, 'Annotations', imgname + '.json'), "w") as outfile:
                     json.dump(data, outfile, indent=4, default=myconverter)
 
 
-def aug(img, bboxes, degree=10):
+def aug(img, bboxes, degree=5):
     '''
 
     Args:
@@ -150,28 +155,28 @@ def aug(img, bboxes, degree=10):
     Returns: the augmented image, and new bboxes with respect to the new image
 
     '''
-    print('ori: ', bboxes)
-    random_transform = [rotate_img_bboxes, flip_pic_bboxes, random_crop_boxes, alterLight]
+    # print('ori: ', bboxes)
+    random_transform = [rotated, flip_pic_bboxes, random_crop_boxes]
     num_transform = random.randint(1,3)
-    randomlist = random.sample(range(0, 4), num_transform)
+    randomlist = random.sample(range(0, 3), num_transform)
+    rotated_f = False
     for i in randomlist:
         if i == 0:
+            if rotated_f: continue
             rotate_degrees = random.randint(-degree, degree)
             img, bboxes = random_transform[i](img, bboxes, rotate_degrees)
-            print('rotated: ', bboxes)
-        elif i == 3:
-            img = random_transform[i](img)
-
+            rotated_f = True
+            # print('rotated_f: ', bboxes)
         else:
             # print(bboxes)
             img, bboxes = random_transform[i](img, bboxes)
-            print('flipped or cropped: ',bboxes)
-    print('return: ', bboxes)
+            # print('flipped or cropped: ',bboxes)
+    # print('return: ', bboxes)
     return img, bboxes
 
 if __name__ == '__main__':
-    imgpath = 'Images'
-    savepath = '/Users/staceywang/Downloads/aug0707'
+    imgpath = '/Users/juntaoxu/Desktop/2021hwsz/data_base/Images'
+    savepath = '/Users/juntaoxu/Desktop/2021hwsz/aug0717'
     if not os.path.exists(savepath):
         os.makedirs(os.path.join(savepath,'Images'))
         os.makedirs(os.path.join(savepath, 'Annotations'))

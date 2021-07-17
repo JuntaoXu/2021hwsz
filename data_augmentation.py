@@ -249,7 +249,7 @@ def random_crop_boxes(img, bboxes, min_scale=-0.1, max_scale=0.1):
     cropped_boxes = list()
     for bbox in bboxes:
         xmin, ymin, xmax, ymax = bbox
-        if (xmax - xmin)*(ymax-ymin) < 800: min_scale, max_scale = 0.1, 0.3
+        if (xmax - xmin)*(ymax-ymin) < 800: min_scale, max_scale = -0.05, 0.1
         scale = random.uniform(min_scale, max_scale)
         w_bbox = xmax - xmin
         h_bbox = ymax - ymin

@@ -10,6 +10,14 @@ os.system('cd /home/work/user-job-dir/code && '
           'cp ./pretrained/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth '
           '/home/work/.cache/torch/hub/checkpoints/'
           'fasterrcnn_resnet50_fpn_coco-258fb6c6.pth')
+<<<<<<< Updated upstream
+=======
+os.system('cd /home/work/user-job-dir/code && '
+          'mkdir -p /home/work/.cache/torch/hub/checkpoints/ &&'
+          'cp ./pretrained/model_last.pth '
+          '/home/work/.cache/torch/hub/checkpoints/'
+          'model_last.pth')
+>>>>>>> Stashed changes
 
 import numpy as np
 from PIL import Image
@@ -22,8 +30,15 @@ from utils.engine import train_one_epoch, evaluate
 from utils import transforms as T
 from utils import utils
 
+<<<<<<< Updated upstream
 # avoid random effect on result
 torch.manual_seed(31)
+=======
+"""
+消除随机因素的影响
+"""
+torch.manual_seed(42)
+>>>>>>> Stashed changes
 
 
 def parse_args():
@@ -60,7 +75,11 @@ args = parse_args()
 
 
 class CustomDataset(object):
+<<<<<<< Updated upstream
     def __init__(self, root, transforms, ignore_area=10):
+=======
+    def __init__(self, root, transforms, ignore_area=250):
+>>>>>>> Stashed changes
         self.root = root
         self.transforms = transforms
         # load all image files, sorting them to
@@ -160,6 +179,11 @@ def get_object_detector(num_classes):
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     return model
 
+def get_trained_obejct_detector(num_classes):
+    model = torch.load('/home/work/.cache/torch/hub/checkpoints/model_last.pth')
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+
 
 def main():
     # train on the GPU or on the CPU, if a GPU is not available
@@ -193,18 +217,27 @@ def main():
     else:
         data_loader_test = None
 
-    # get the model using our helper function
-    model = get_object_detector(num_classes)
+    Resume = True
+    if Resume:
+        get_trained_obejct_detector(num_classes)
+    else:
+        # get the model using our helper function
+        model = get_object_detector(num_classes)
 
     # move model to the right device
     model.to(device)
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
+<<<<<<< Updated upstream
     optimizer = torch.optim.SGD(params, lr=0.001,
                                 momentum=0.95, weight_decay=0.0005)
     learning_rate = 0.001
     # optimizer = torch.optim.RMSprop(params, lr=learning_rate, alpha=0.99, eps=1e-08, weight_decay=0.0005, momentum=0.95, centered=False)
+=======
+    optimizer = torch.optim.SGD(params, lr=0.01,
+                                momentum=0.95, weight_decay=0.0005)
+>>>>>>> Stashed changes
     # and a learning rate scheduler
     # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
     #                                                step_size=2,
