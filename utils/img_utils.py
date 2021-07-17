@@ -5,9 +5,6 @@ from tqdm import tqdm
 
 pic_origin_dir = "D:/2021hwsz/data/base_unzip/Images/"
 annotation_origin_dir = "D:/2021hwsz/data/base_unzip/Annotations/"
-saving_dir = "D:/2021hwsz/Images_with_bboxes/"
-pic_origin_dir = "/Users/juntaoxu/Desktop/2021hwsz/aug0708_unzip/Images/Images/"
-annotation_dir = "/Users/juntaoxu/Desktop/2021hwsz/aug0708_unzip/Annotations/Annotations/"
 saving_dir = ""
 
 defect_bbox_area = 10
