@@ -10,11 +10,11 @@ os.system('cd /home/work/user-job-dir/code && '
           'cp ./pretrained/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth '
           '/home/work/.cache/torch/hub/checkpoints/'
           'fasterrcnn_resnet50_fpn_coco-258fb6c6.pth')
-os.system('cd /home/work/user-job-dir/code && '
-          'mkdir -p /home/work/.cache/torch/hub/checkpoints/ &&'
-          'cp ./pretrained/model_last.pth '
-          '/home/work/.cache/torch/hub/checkpoints/'
-          'model_last.pth')
+# os.system('cd /home/work/user-job-dir/code && '
+#           'mkdir -p /home/work/.cache/torch/hub/checkpoints/ &&'
+#           'cp ./proceed/model_last.pth '
+#           '/home/work/.cache/torch/hub/checkpoints/'
+#           'model_last.pth')
 
 import numpy as np
 from PIL import Image
@@ -22,17 +22,19 @@ import moxing as mox
 import torch
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 
 from utils.engine import train_one_epoch, evaluate
 from utils import transforms as T
 from utils import utils
+
+RESUME = False
 
 # avoid random effect on result
 torch.manual_seed(31)
 """
 消除随机因素的影响
 """
-torch.manual_seed(42)
 
 
 def parse_args():
@@ -54,7 +56,6 @@ def parse_args():
                         help='the dataset dir of validation dataset')
     parser.add_argument('--ckpt-dir', type=str, required=True,
                         help='the checkpoint dir')
-
     parser.add_argument('--num-classes', type=int, required=True,
                         help='num-classes, do not include bg')
     parser.add_argument('--batch-size', type=int, required=True,
@@ -168,13 +169,6 @@ def get_object_detector(num_classes):
     return model
 
 
-def get_trained_obejct_detector(num_classes):
-    model = torch.load('/home/work/.cache/torch/hub/checkpoints/model_last.pth')
-    in_features = model.roi_heads.box_predictor.cls_score.in_features
-    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
-    return model
-
-
 def main():
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if \
@@ -206,29 +200,33 @@ def main():
     else:
         data_loader_test = None
 
-    resume = True
-    if resume:
-        model = get_trained_obejct_detector(num_classes)
+    if RESUME:
+        path_checkpoint = '/home/work/.cache/torch/hub/checkpoints/model_last.pth'  # 断点路径
+        # checkpoint = torch.load(path_checkpoint)
+        # backbone = resnet_fpn_backbone('resnet50',)
+        # optimizer = torch.optim.SGD(params, lr=0.01,
+        #                             momentum=0.95, weight_decay=0.0005)
+        # model.load_state_dict(checkpoint['model'])
+        # optimizer.load_state_dict(checkpoint['optimizer'])
+
+
     else:
         # get the model using our helper function
         model = get_object_detector(num_classes)
 
-    # move model to the right device
-    model.to(device)
+        # move model to the right device
+        model.to(device)
 
-    # construct an optimizer
-    params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=0.001,
-                                momentum=0.95, weight_decay=0.0005)
-    learning_rate = 0.001
-    # optimizer = torch.optim.RMSprop(params, lr=learning_rate,
-    #                                 alpha=0.99, eps=1e-08, weight_decay=0.0005, momentum=0.95, centered=False)
-    optimizer = torch.optim.SGD(params, lr=0.01,
-                                momentum=0.95, weight_decay=0.0005)
-    # and a learning rate scheduler
-    # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-    #                                                step_size=2,
-    #                                                gamma=0.2)
+        # construct an optimizer
+        params = [p for p in model.parameters() if p.requires_grad]
+        optimizer = torch.optim.RMSprop(params, lr=0.001, weight_decay=0.0005, momentum=0.95, centered=False)
+        # optimizer = torch.optim.SGD(params, lr=0.001,
+        #                             momentum=0.95, weight_decay=0.0005)
+        # and a learning rate scheduler
+        # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
+        #                                                step_size=2,
+        #                                                gamma=0.2)
+
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 5, eta_min=0.00001, last_epoch=-1)
 
     # let's train it for 10 epochs

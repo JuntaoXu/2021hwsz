@@ -90,7 +90,7 @@ def shift_pic_bboxes(img, bboxes):
 
 # alter exposure
 def alterLight(img):
-    flag = random.uniform(0.5, 1.5)  # lighter when flag < 1, darker when flag > 1
+    flag = random.uniform(0.8, 1.2)  # lighter when flag < 1, darker when flag > 1
     return exposure.adjust_gamma(img, flag)
 
 
@@ -249,7 +249,7 @@ def random_crop_boxes(img, bboxes, min_scale=-0.1, max_scale=0.1):
     cropped_boxes = list()
     for bbox in bboxes:
         xmin, ymin, xmax, ymax = bbox
-        if (xmax - xmin)*(ymax-ymin) < 800: min_scale, max_scale = -0.05, 0.1
+        if (xmax - xmin)*(ymax-ymin) < 800: min_scale, max_scale = 0.05, 0.1
         scale = random.uniform(min_scale, max_scale)
         w_bbox = xmax - xmin
         h_bbox = ymax - ymin
@@ -260,6 +260,70 @@ def random_crop_boxes(img, bboxes, min_scale=-0.1, max_scale=0.1):
         bbox = [xmin,ymin,xmax,ymax]
         cropped_boxes.append(bbox)
     return img, cropped_boxes
+
+def random_resize(img, bboxes, scales=[0.7,1.3], ratios=[0.9,1.0]):
+    '''
+
+    Args:
+        img:
+        bboxes:
+        crop: the probability for a crop to happen
+        scales: (min, max)
+        ratio: (min, max)
+
+    Returns:
+
+    '''
+
+    h, w = img.shape[:2]
+    new_boxes = list()
+    scale = random.uniform(scales[0], scales[1])
+    ratio = random.uniform(ratios[0], ratios[1])
+    width = scale*w
+    height = scale*h
+    if random.uniform(0, 1) < 0.5: width *= ratio
+    else: height *= ratio
+    w_ratio = width/w
+    h_ratio = height/h
+    for bbox in bboxes:
+        xmin, ymin, xmax, ymax = bbox
+        xmin*=w_ratio
+        xmax*=w_ratio
+        ymin*=h_ratio
+        ymax*=h_ratio
+        bbox = [xmin, ymin, xmax, ymax]
+        new_boxes.append(bbox)
+    new_img = cv2.resize(img, (width,height), interpolation = cv2.INTER_AREA)
+    return new_img, new_boxes
+
+def random_crop(img, bboxes, scales=0.7):
+    h, w = img.shape[:2]
+    new_boxes = list()
+    scale = random.uniform(0, 1-scales)
+    x_scale = random.uniform(0, scale)
+    y_scale = random.uniform(0, scale)
+    x_start = w * x_scale
+    y_start = h * y_scale
+    x_end = w * (1-scale+x_scale)
+    y_end = h * (1-scale+y_scale)
+    min_x = min(min([i[0] for i in bboxes]), x_start)
+    min_y = min(min([i[1] for i in bboxes]), y_start)
+    max_x = max(max([i[2] for i in bboxes]), x_end)
+    max_y = max(max([i[3] for i in bboxes]), y_end)
+    for bbox in bboxes:
+        xmin, ymin, xmax, ymax = bbox
+        xmin -= min_x
+        xmax -= min_x
+        ymin -= min_y
+        ymax -= min_y
+        bbox = [xmin, ymin, xmax, ymax]
+        new_boxes.append(bbox)
+    new_img = img[min_y:max_y, min_x:max_x]
+    return new_img, new_boxes
+
+
+
+
 
 
 if __name__ == '__main__':

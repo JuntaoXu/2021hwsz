@@ -53,7 +53,7 @@ def read_imgs(imgpath, savepath):
                     hard[label].append(bbox)
                 else: hard[label] = [bbox]
                 # print('addlabel:', hard[label])
-                loop = 8
+                loop = 10
             elif label in COMMON_CLASS:
                 # print("common is", common)
                 # print(bbox)
@@ -62,9 +62,9 @@ def read_imgs(imgpath, savepath):
                 else:
                     common[label] = [bbox]
 
-                loop = 5
+                loop = 8
             else:
-                loop = 2
+                loop = 4
             loop_count.append(loop)
         # set a min data augmentation number
         base_loop = min(loop_count)
@@ -95,17 +95,18 @@ def read_imgs(imgpath, savepath):
         if len(hard) >= 1:
             # print(hard)
             shapes = ori_shapes
-            bboxes = list()
+            # bboxes = list()
             rot_deg = 10
             for h in hard:
                 # print(hard[h])
                 if h in LESS_ROTATION: rot_deg = 5
-                bboxes.extend(hard[h])
-            for i in range(8-base_loop):
+                # bboxes.extend(hard[h])
+            for i in range(11-base_loop):
                 newI, newbboxes = aug(I, bboxes, rot_deg)
                 imgname = os.path.split(img)[-1].split('.')[0] + '_' + 'hard' + '_' + str(i)
                 cv2.imwrite(os.path.join(savepath,'Images',imgname + '.jpg'), newI)
-                shapes = [i for i in shapes if i['label'] in hard.keys()]
+                # shapes = [i for i in shapes if i['label'] in hard.keys()]
+                shapes = data['shapes']
                 if len(shapes) < 1: continue
                 # print(shapes)
                 for idx, s in enumerate(shapes):
@@ -120,19 +121,20 @@ def read_imgs(imgpath, savepath):
         if len(common) >= 1 and common is not None:
             # print(common)
             shapes = ori_shapes
-            bboxes = list()
+            # bboxes = list()
             rot_deg = 15
-            for h in common:
-                if common[h] is None:
-                    # print(h, img)
-                    continue
-                bboxes.extend(common[h])
+            # for h in common:
+            #     if common[h] is None:
+            #         # print(h, img)
+            #         continue
+                # bboxes.extend(common[h])
             for i in range(8-base_loop):
                 # print(bboxes)
                 newI, newbboxes = aug(I, bboxes, rot_deg)
                 imgname = os.path.split(img)[-1].split('.')[0] + '_' + 'common' + '_' + str(i)
                 cv2.imwrite(os.path.join(savepath,'Images',imgname + '.jpg'), newI)
-                shapes = [i for i in shapes if i['label'] in common.keys()]
+                # shapes = [i for i in shapes if i['label'] in common.keys()]
+                shapes = data['shapes']
                 for idx, s in enumerate(shapes):
                     newbbox = newbboxes[idx]
                     newbbox = [[newbbox[0], newbbox[1]], [newbbox[2], newbbox[3]]]
@@ -156,7 +158,7 @@ def aug(img, bboxes, degree=5):
 
     '''
     # print('ori: ', bboxes)
-    random_transform = [rotated, flip_pic_bboxes, random_crop_boxes]
+    random_transform = [rotated, alterLight, flip_pic_bboxes, random_crop_boxes, random_resize, random_crop]
     num_transform = random.randint(1,3)
     randomlist = random.sample(range(0, 3), num_transform)
     rotated_f = False
@@ -167,6 +169,8 @@ def aug(img, bboxes, degree=5):
             img, bboxes = random_transform[i](img, bboxes, rotate_degrees)
             rotated_f = True
             # print('rotated_f: ', bboxes)
+        elif i == 1:
+            img = random_transform[i](img)
         else:
             # print(bboxes)
             img, bboxes = random_transform[i](img, bboxes)
@@ -174,9 +178,10 @@ def aug(img, bboxes, degree=5):
     # print('return: ', bboxes)
     return img, bboxes
 
+
 if __name__ == '__main__':
-    imgpath = '/Users/juntaoxu/Desktop/2021hwsz/data_base/Images'
-    savepath = '/Users/juntaoxu/Desktop/2021hwsz/aug0717'
+    imgpath = '/Volumes/Sandisk/2021hwsz/data/base_unzip/Images'
+    savepath = '/Users/juntaoxu/Desktop/2021hwsz/aug0719'
     if not os.path.exists(savepath):
         os.makedirs(os.path.join(savepath,'Images'))
         os.makedirs(os.path.join(savepath, 'Annotations'))
