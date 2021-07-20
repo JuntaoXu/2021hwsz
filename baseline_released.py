@@ -209,23 +209,22 @@ def main():
         # model.load_state_dict(checkpoint['model'])
         # optimizer.load_state_dict(checkpoint['optimizer'])
 
+    # get the model using our helper function
+    model = get_object_detector(num_classes)
 
-    else:
-        # get the model using our helper function
-        model = get_object_detector(num_classes)
+    # move model to the right device
+    model.to(device)
 
-        # move model to the right device
-        model.to(device)
-
-        # construct an optimizer
-        params = [p for p in model.parameters() if p.requires_grad]
-        optimizer = torch.optim.RMSprop(params, lr=0.001, weight_decay=0.0005, momentum=0.95, centered=False)
-        # optimizer = torch.optim.SGD(params, lr=0.001,
-        #                             momentum=0.95, weight_decay=0.0005)
-        # and a learning rate scheduler
-        # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-        #                                                step_size=2,
-        #                                                gamma=0.2)
+    # construct an optimizer
+    params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.Adam(params, lr=0.0001)
+    # optimizer = torch.optim.RMSprop(params, lr=0.0005, weight_decay=0.0001, momentum=0.95, centered=False)
+    # optimizer = torch.optim.SGD(params, lr=0.001,
+    #                             momentum=0.95, weight_decay=0.0005)
+    # and a learning rate scheduler
+    # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
+    #                                                step_size=2,
+    #                                                gamma=0.2)
 
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 5, eta_min=0.00001, last_epoch=-1)
 
