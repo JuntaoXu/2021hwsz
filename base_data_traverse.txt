@@ -1,0 +1,2 @@
+['right_angle_edge_defect', 'connection_edge_defect', 'burr_defect', 'cavity_defect', 'huahen', 'mosun', 'yanse', 'jianju', 'basi', 'chuizhidu']
+[2913, 3426, 915, 211, 596, 552, 895, 525, 558, 120]
